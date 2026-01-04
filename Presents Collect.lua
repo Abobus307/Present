@@ -50,10 +50,8 @@ Btn.MouseButton1Click:Connect(function()
 end)
 
 Folder.ChildAdded:Connect(function(child)
-    if not Enabled then
-        task.wait(0.1)
-        return 
-    end
+    if not Enabled then return end
+    task.wait(0.1)
 
     if HRP and child then
         local targetCF = child:GetPivot()
