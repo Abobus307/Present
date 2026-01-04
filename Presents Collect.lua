@@ -1,45 +1,64 @@
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
-local LocalPlayer = Players.LocalPlayer
+local Vector3new = Vector3.new
+local UDim2new = UDim2.new
+local UDimnew = UDim.new
+local Color3RGB = Color3.fromRGB
+local Instancenew = Instance.new
 
+local LocalPlayer = Players.LocalPlayer
 local Folder = Workspace:WaitForChild("Presents", 10)
 if not Folder then return end
+
+local OFFSET = Vector3new(0, 3, 0)
+local COLOR_ON = Color3RGB(0, 200, 0)
+local COLOR_OFF = Color3RGB(255, 0, 0)
 
 local Enabled = false
 local HRP
 
-local function UpdateChar(char)
-    HRP = char:WaitForChild("HumanoidRootPart", 10)
+local function OnCharacter(char)
+    HRP = char:WaitForChild("HumanoidRootPart", 5)
 end
 
-if LocalPlayer.Character then UpdateChar(LocalPlayer.Character) end
-LocalPlayer.CharacterAdded:Connect(UpdateChar)
+if LocalPlayer.Character then
+    task.spawn(OnCharacter, LocalPlayer.Character)
+end
+LocalPlayer.CharacterAdded:Connect(OnCharacter)
 
-local Gui = Instance.new("ScreenGui")
+local Gui = Instancenew("ScreenGui")
+Gui.Name = "AutoTP"
 Gui.ResetOnSpawn = false
-Gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+Gui.Parent = LocalPlayer.PlayerGui
 
-local Btn = Instance.new("TextButton")
-Btn.Size = UDim2.new(0, 160, 0, 50)
-Btn.Position = UDim2.new(0, 10, 0.5, 0)
-Btn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+local Btn = Instancenew("TextButton")
+Btn.Size = UDim2new(0, 160, 0, 50)
+Btn.Position = UDim2new(0, 10, 0.5, 0)
+Btn.BackgroundColor3 = COLOR_OFF
+Btn.TextColor3 = Color3RGB(255, 255, 255)
+Btn.Font = Enum.Font.SourceSansBold
 Btn.TextSize = 18
 Btn.Text = "TP: OFF"
 Btn.Parent = Gui
-Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
+
+Instancenew("UICorner", Btn).CornerRadius = UDimnew(0, 8)
 
 Btn.MouseButton1Click:Connect(function()
     Enabled = not Enabled
-    Btn.BackgroundColor3 = Enabled and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(255, 0, 0)
+    Btn.BackgroundColor3 = Enabled and COLOR_ON or COLOR_OFF
     Btn.Text = Enabled and "TP: ON" or "TP: OFF"
 end)
 
 Folder.ChildAdded:Connect(function(child)
-    if not Enabled then return end
-    task.wait(0.05)
-    
-    if HRP and child.Parent then
-        HRP.CFrame = child:GetPivot() + Vector3.new(0, 3, 0)
+    if not Enabled then
+        task.wait(0.1)
+        return 
+    end
+
+    if HRP and child then
+        local targetCF = child:GetPivot()
+        if targetCF then
+            HRP.CFrame = targetCF + OFFSET
+        end
     end
 end)
