@@ -5,6 +5,19 @@ local LocalPlayer = Players.LocalPlayer
 local Folder = Workspace:WaitForChild("Presents", 10)
 if not Folder then return end
 
+local OFFSET = Vector3.new(0, 3, 0)
+local Enabled = false
+local HRP = nil
+
+local function CacheCharacter(char)
+    HRP = char:WaitForChild("HumanoidRootPart", 5)
+end
+
+if LocalPlayer.Character then
+    CacheCharacter(LocalPlayer.Character)
+end
+LocalPlayer.CharacterAdded:Connect(CacheCharacter)
+
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AutoTP_GUI"
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
@@ -21,38 +34,15 @@ Button.TextSize = 18
 Button.Text = "TP: OFF"
 Button.TextColor3 = Color3.new(1, 1, 1)
 
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 8)
-Corner.Parent = Button
-
-local Enabled = false
-
-local function UpdateState()
-	if Enabled then
-		Button.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-		Button.Text = "TP: ON"
-	else
-		Button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-		Button.Text = "TP: OFF"
-	end
-end
+Instance.new("UICorner", Button).CornerRadius = UDim.new(0, 8)
 
 Button.MouseButton1Click:Connect(function()
-	Enabled = not Enabled
-	UpdateState()
+    Enabled = not Enabled
+    Button.BackgroundColor3 = Enabled and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(255, 0, 0)
+    Button.Text = Enabled and "TP: ON" or "TP: OFF"
 end)
 
 Folder.ChildAdded:Connect(function(child)
-	if not Enabled then return end
-	task.wait(0.1)
-
-	local Char = LocalPlayer.Character
-	local HRP = Char and Char:FindFirstChild("HumanoidRootPart")
-
-	if HRP and child then
-		local targetCF = child:GetPivot()
-		if targetCF then
-			HRP.CFrame = targetCF + Vector3.new(0, 3, 0)
-		end
-	end
+    if not Enabled or not HRP then return end
+    HRP.CFrame = child:GetPivot() + OFFSET
 end)
