@@ -58,6 +58,17 @@ local function TeleportToPresent(child)
     if targetCF then
         HRP.CFrame = targetCF + OFFSET
     end
+
+    task.wait(0.15)
+
+    if LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Velocity = Vector3new(0, 0, 0)
+                part.Anchored = true
+            end
+        end
+    end
 end
 
 Btn.MouseButton1Click:Connect(function()
@@ -69,7 +80,6 @@ Btn.MouseButton1Click:Connect(function()
         for _, child in ipairs(Folder:GetChildren()) do
             if not Enabled then break end
             TeleportToPresent(child)
-            task.wait(0.15)
         end
     end
 end)
