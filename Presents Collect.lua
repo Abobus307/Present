@@ -10,7 +10,7 @@ local LocalPlayer = Players.LocalPlayer
 local Folder = Workspace:WaitForChild("Presents", 10)
 if not Folder then return end
 
-local OFFSET = Vector3new(0, 3, 0)
+local OFFSET = Vector3new(0, 0, 0)
 local COLOR_ON = Color3RGB(0, 200, 0)
 local COLOR_OFF = Color3RGB(255, 0, 0)
 
@@ -27,9 +27,9 @@ end
 LocalPlayer.CharacterAdded:Connect(OnCharacter)
 
 local Gui = Instancenew("ScreenGui")
-Gui.Name = "AutoTP"
+Gui.Name = "AutoTP_Fixed"
 Gui.ResetOnSpawn = false
-Gui.Parent = LocalPlayer.PlayerGui
+Gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local Btn = Instancenew("TextButton")
 Btn.Size = UDim2new(0, 160, 0, 50)
@@ -43,20 +43,39 @@ Btn.Parent = Gui
 
 Instancenew("UICorner", Btn).CornerRadius = UDimnew(0, 8)
 
+local function TeleportToPresent(child)
+    if not HRP or not child or not child.Parent then return end
+
+    if LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Anchored = false
+            end
+        end
+    end
+
+    local targetCF = child:GetPivot()
+    if targetCF then
+        HRP.CFrame = targetCF + OFFSET
+    end
+end
+
 Btn.MouseButton1Click:Connect(function()
     Enabled = not Enabled
     Btn.BackgroundColor3 = Enabled and COLOR_ON or COLOR_OFF
     Btn.Text = Enabled and "TP: ON" or "TP: OFF"
+
+    if Enabled then
+        for _, child in ipairs(Folder:GetChildren()) do
+            if not Enabled then break end
+            TeleportToPresent(child)
+            task.wait(0.15)
+        end
+    end
 end)
 
 Folder.ChildAdded:Connect(function(child)
     if not Enabled then return end
     task.wait(0.1)
-
-    if HRP and child then
-        local targetCF = child:GetPivot()
-        if targetCF then
-            HRP.CFrame = targetCF + OFFSET
-        end
-    end
+    TeleportToPresent(child)
 end)
