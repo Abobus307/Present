@@ -27,7 +27,7 @@ end
 LocalPlayer.CharacterAdded:Connect(OnCharacter)
 
 local Gui = Instancenew("ScreenGui")
-Gui.Name = "AutoTP_Fixed"
+Gui.Name = "AutoTP"
 Gui.ResetOnSpawn = false
 Gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
